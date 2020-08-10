@@ -1,18 +1,28 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <div>
+        <item-cards :items="items" />
+    </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import ItemCards from "@/components/core/item-cards";
 
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  }
-}
+    data() {
+        return {
+            items: [
+                { id: 1, name: "Test", description: "Just test it" },
+                { id: 2, name: "Test", description: "Just test it" },
+                { id: 3, name: "Test", description: "Just test it" },
+                { id: 4, name: "Test", description: "Just test it" },
+                { id: 5, name: "Test", description: "Just test it" },
+                { id: 6, name: "Test", description: "Just test it" },
+                { id: 7, name: "Test", description: "Just test it" },
+            ],
+        };
+    },
+    components: {
+        ItemCards,
+    },
+};
 </script>
