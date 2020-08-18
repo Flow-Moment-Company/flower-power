@@ -11,11 +11,23 @@
 <script>
 import Header from "@/components/core/header";
 import Footer from "@/components/core/footer";
+import { mapMutations } from "vuex";
+import * as fcl from "@onflow/fcl";
 
 export default {
     components: {
         Header,
         Footer,
+    },
+    methods: {
+        ...mapMutations(["setLoggedIn"]),
+    },
+    mounted() {
+        const vm = this;
+
+        fcl.currentUser().subscribe((user) => {
+            vm.setLoggedIn(user.loggedIn);
+        });
     },
 };
 </script>
@@ -26,20 +38,14 @@ export default {
     top: 0px;
     width: 100%;
     height: 50px;
-    z-index: 2;
 }
 .content {
-    position: fixed;
-    top: 50px;
-    bottom: 50px;
-    width: 100%;
-    z-index: 1;
+    margin-top: 100px;
 }
 .footer {
     position: fixed;
     bottom: 0px;
     width: 100%;
     height: 50px;
-    z-index: 2;
 }
 </style>
