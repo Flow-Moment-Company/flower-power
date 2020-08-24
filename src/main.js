@@ -8,7 +8,10 @@ import vuetify from './plugins/vuetify';
 Vue.config.productionTip = false
 
 fcl.config()
-  .put("challenge.handshake", "http://localhost:8701/flow/authenticate")
+  .put("accessNode.api", "http://localhost:8080") // local Flow emulator
+  .put("challenge.handshake", "http://localhost:8701/flow/authenticate") // local dev wallet
+  // .put("accessNode.api", "https://access-testnet.onflow.org") // Flow testnet
+  // .put("challenge.handshake", "https://flow-wallet-testnet.blocto.app/authn") // Blocto testnet wallet
 
 new Vue({
   router,

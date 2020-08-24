@@ -6,10 +6,9 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "dev:wallet": "fcl-wallet"
+    "dev:wallet": "PK=bf9db4706c2fdb9011ee7e170ccac492f05427b96ab41d8bf2d8c58443704b76 fcl-wallet"
   },
   "dependencies": {
-    "@onflow/dev-wallet": "0.0.8",
     "@onflow/fcl": "0.0.51",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
@@ -18,6 +17,7 @@
     "vuex": "^3.5.1"
   },
   "devDependencies": {
+    "@onflow/dev-wallet": "0.0.8",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-plugin-eslint": "~4.4.0",
     "@vue/cli-plugin-router": "^4.4.6",
