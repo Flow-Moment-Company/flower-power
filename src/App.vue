@@ -11,7 +11,7 @@
 <script>
 import Header from "@/components/core/header";
 import Footer from "@/components/core/footer";
-import { mapMutations } from "vuex";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 import * as fcl from "@onflow/fcl";
 
 export default {
@@ -19,14 +19,74 @@ export default {
         Header,
         Footer,
     },
+    computed: {
+        ...mapGetters(["address"]),
+    },
     methods: {
-        ...mapMutations(["setLoggedIn"]),
+        ...mapMutations(["setUser", "setMoments"]),
+        ...mapActions(["sendScript"]),
+        async loadMomentMetadata() {
+            const vm = this;
+            const momentIds = await vm.sendScript(`
+                import TopShot from 0x179b6b1cb6755e31
+
+                pub fun main(): [UInt64] {
+
+                    let acct = getAccount(0x${vm.address}) 
+                    let collectionRef = acct.getCapability(/public/MomentCollection)!
+                                            .borrow<&{TopShot.MomentCollectionPublic}>()!
+
+                    log(collectionRef.getIDs())
+
+                    return collectionRef.getIDs()
+                }
+            `);
+
+            const moments = [];
+
+            for (const momentId of momentIds) {
+                const metadata = await vm.sendScript(`
+                    import TopShot from 0x179b6b1cb6755e31
+
+                    pub fun main(): {String: String} {
+
+                        // get the public capability for the owner's moment collection
+                        // and borrow a reference to it
+                        let collectionRef = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
+                            .borrow<&{TopShot.MomentCollectionPublic}>()
+                            ?? panic("Could not get public moment collection reference")
+
+                        // Borrow a reference to the specified moment
+                        let token = collectionRef.borrowMoment(id: ${momentId})
+                            ?? panic("Could not borrow a reference to the specified moment")
+
+                        // Get the moment's metadata to access its play and Set IDs
+                        let data = token.data
+
+                        // Use the moment's play ID 
+                        // to get all the metadata associated with that play
+                        let metadata = TopShot.getPlayMetaData(playID: data.playID) ?? panic("Play doesn't exist")
+
+                        log(metadata)
+
+                        return metadata
+                    }
+                `);
+                moments.push(metadata);
+            }
+            return moments;
+        },
     },
     mounted() {
         const vm = this;
 
-        fcl.currentUser().subscribe((user) => {
-            vm.setLoggedIn(user.loggedIn);
+        fcl.currentUser().subscribe(async (user) => {
+            vm.setUser(user);
+            if (user.loggedIn) {
+                vm.setMoments(await vm.loadMomentMetadata());
+            } else {
+                vm.setMoments([]);
+            }
         });
     },
 };

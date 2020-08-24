@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-data-iterator :items="items">
+        <v-data-iterator :items="moments">
             <template #default="props">
                 <v-row>
                     <v-col
@@ -12,19 +12,19 @@
                         lg="3"
                     >
                         <v-card>
-                            <v-card-title>{{ item.name }}</v-card-title>
-                            {{ item.description }}
+                            <v-card-title>{{ item.FullName }}</v-card-title>
+                            {{ item.CurrentTeam }}
                         </v-card>
                     </v-col>
                 </v-row>
             </template>
         </v-data-iterator>
-        <v-btn @click="testTransaction">Send transaction</v-btn>
+        <v-btn @click="setupAccount">Create Collection</v-btn>
     </div>
 </template>
 
 <script>
-import * as fcl from "@onflow/fcl";
+import { mapGetters, mapActions, mapState } from "vuex";
 
 export default {
     data() {
@@ -40,26 +40,38 @@ export default {
             ],
         };
     },
+    computed: {
+        ...mapState(["moments"]),
+        ...mapGetters(["address"]),
+    },
     methods: {
-        async testTransaction() {
-            const response = await fcl.send([
-                fcl.transaction`
-                    transaction {
-                        execute {
-                            log("A transaction happened")
+        ...mapActions(["sendScript", "sendTransaction"]),
+        setupAccount() {
+            const vm = this;
+            vm.sendTransaction(`
+                import TopShot from 0x179b6b1cb6755e31
+
+                transaction {
+
+                    prepare(acct: AuthAccount) {
+
+                        // First, check to see if a moment collection already exists
+                        if acct.borrow<&TopShot.Collection>(from: /storage/MomentCollection) == nil {
+
+                            // create a new TopShot Collection
+                            let collection <- TopShot.createEmptyCollection() as! @TopShot.Collection
+
+                            // Put the new Collection in storage
+                            acct.save(<-collection, to: /storage/MomentCollection)
+
+                            // create a public capability for the collection
+                            acct.link<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection, target: /storage/MomentCollection)
                         }
                     }
-                `,
-                fcl.proposer(fcl.currentUser().authorization),
-                fcl.payer(fcl.currentUser().authorization),
-            ]);
-
-            fcl.tx(response).subscribe((transaction) => {
-                if (fcl.tx.isSealed(transaction)) {
-                    console.log("Transaction Confirmed: Is Sealed");
                 }
-            });
+            `);
         },
     },
 };
 </script>
+ 

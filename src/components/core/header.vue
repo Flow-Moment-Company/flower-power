@@ -8,7 +8,7 @@
 
 <script>
 import * as fcl from "@onflow/fcl";
-import { mapState } from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
     data() {
@@ -17,7 +17,7 @@ export default {
         };
     },
     computed: {
-        ...mapState(["loggedIn"]),
+        ...mapGetters(["loggedIn"]),
     },
 };
 </script>
