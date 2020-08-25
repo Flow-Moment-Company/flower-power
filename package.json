@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "dev:wallet": "set PK=bf9db4706c2fdb9011ee7e170ccac492f05427b96ab41d8bf2d8c58443704b76 && fcl-wallet"
+    "dev:wallet": "set PK=bf9db4706c2fdb9011ee7e170ccac492f05427b96ab41d8bf2d8c58443704b76 && fcl-wallet",
+    "dev:emulator": "flow emulator start --init --verbose --service-priv-key bf9db4706c2fdb9011ee7e170ccac492f05427b96ab41d8bf2d8c58443704b76 --service-sig-algo ECDSA_P256 --service-hash-algo SHA3_256"
   },
   "dependencies": {
     "@onflow/fcl": "0.0.51",
