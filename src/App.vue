@@ -50,21 +50,15 @@ export default {
 
                     pub fun main(): {String: String} {
 
-                        // get the public capability for the owner's moment collection
-                        // and borrow a reference to it
                         let collectionRef = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
                             .borrow<&{TopShot.MomentCollectionPublic}>()
                             ?? panic("Could not get public moment collection reference")
 
-                        // Borrow a reference to the specified moment
                         let token = collectionRef.borrowMoment(id: ${momentId})
                             ?? panic("Could not borrow a reference to the specified moment")
 
-                        // Get the moment's metadata to access its play and Set IDs
                         let data = token.data
 
-                        // Use the moment's play ID 
-                        // to get all the metadata associated with that play
                         let metadata = TopShot.getPlayMetaData(playID: data.playID) ?? panic("Play doesn't exist")
 
                         log(metadata)
@@ -72,6 +66,20 @@ export default {
                         return metadata
                     }
                 `);
+
+                const autographIds = await vm.sendScript(`
+                    import TopShot from 0x179b6b1cb6755e31
+                    pub fun main(): [UInt64] {
+                        let token = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
+                                    .borrow<&{TopShot.MomentCollectionPublic}>()!.borrowMoment(id: ${momentId})!
+                        log(token.autographs.keys)
+                        return token.autographs.keys
+                    }
+                `);
+
+                console.log(autographIds);
+
+                metadata.id = momentId;
                 moments.push(metadata);
             }
             return moments;
