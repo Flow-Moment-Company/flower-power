@@ -100,11 +100,11 @@ export default {
  
                     `);
 
-                    const signatureMetadata = await vm.sendScript(`
+                    const signatureDocument = await vm.sendScript(`
                         import TopShot from 0x179b6b1cb6755e31
                         import Autograph from 0xf3fcd2c1a78f5eee
 
-                        pub fun main(): {String: String} {
+                        pub fun main(): String {
                             let collectionRef = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
                                 .borrow<&{TopShot.MomentCollectionPublic}>()
                                 ?? panic("Could not get public moment collection reference")
@@ -114,13 +114,13 @@ export default {
 
                             let autograph = &moment.autographs[UInt64(${autographId})] as &Autograph.NFT
 
-                            log(autograph.metadata)
-                            return autograph.metadata
+                            log(autograph.document)
+                            return autograph.document
                         }
                     `);
 
                     metadata.autographs.push({
-                        metadata: signatureMetadata,
+                        document: signatureDocument,
                         author,
                     });
                 }

@@ -17,12 +17,12 @@
                             Autographs:
                             <span
                                 v-for="autograph of item.autographs"
-                                :key="autograph.metadata"
+                                :key="autograph.document"
                             >
                                 {{ autograph.author }}
                                 <v-img
-                                    v-if="autograph.metadata.SignatureBlob"
-                                    :src="autograph.metadata.SignatureBlob"
+                                    v-if="autograph.document"
+                                    :src="autograph.document"
                                 />
                             </span>
                             <v-card-actions>
@@ -72,7 +72,7 @@ export default {
                 // Parameters:
                 //
                 // momentID: The id of the moment to attach autograph
-                // metadata: Dictionary of Autograph metadata
+                // document: String of Autograph document
 
                 transaction() {
                     prepare(acct: AuthAccount) {
@@ -89,7 +89,7 @@ export default {
                         let authorRef = acct.borrow<&Autograph.Author>(from: /storage/AutographAuthor)!
 
                         // Mint a new NFT
-                        let autograph <- Autograph.mintAutograph(metadata: {"SignatureBlob": "${blobText}"}, author: authorRef)
+                        let autograph <- Autograph.mintAutograph(document: "${blobText}", author: authorRef)
 
                         // destroy the author resource
                         destroy <-acct.load<@Autograph.Author>(from: /storage/AutographAuthor)
