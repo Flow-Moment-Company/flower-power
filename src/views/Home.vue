@@ -14,30 +14,44 @@
                         <v-card>
                             <v-card-title>{{ item.FullName }}</v-card-title>
                             {{ item.CurrentTeam }}
+                            Autographs:
+                            <span
+                                v-for="autograph of item.autographs"
+                                :key="autograph.metadata"
+                            >
+                                {{ autograph.author }}
+                                <v-img
+                                    v-if="autograph.metadata.SignatureBlob"
+                                    :src="autograph.metadata.SignatureBlob"
+                                />
+                            </span>
                             <v-card-actions>
-                                <v-btn @click="createSignature(item.id)">Sign it!</v-btn>
+                                <v-btn
+                                    @click="showSignaturePad = true; currentMomentId = item.id"
+                                >Sign it!</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-col>
                 </v-row>
             </template>
         </v-data-iterator>
-        <!--<v-btn @click="setupTopShotAccount">Create Moment Collection</v-btn>
-        <v-btn @click="setupSignatureAccount">Create Signature Collection</v-btn>-->
-        <VueSignaturePad id="signature" width="100%" height="500px" :options="options" />
+        <SignaturePad @newSignature="createSignature" />
     </div>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapState } from "vuex";
+import SignaturePad from "@/components/core/signature-pad";
 
 export default {
     data() {
         return {
-            options: {
-                penColor: "#c0f",
-            },
+            showSignaturePad: false,
+            currentMomentId: null,
         };
+    },
+    components: {
+        SignaturePad,
     },
     computed: {
         ...mapState(["moments"]),
@@ -45,61 +59,7 @@ export default {
     },
     methods: {
         ...mapActions(["sendScript", "sendTransaction"]),
-        setupTopShotAccount() {
-            const vm = this;
-            vm.sendTransaction(`
-                import TopShot from 0x179b6b1cb6755e31
-
-                transaction {
-
-                    prepare(acct: AuthAccount) {
-
-                        // First, check to see if a moment collection already exists
-                        if acct.borrow<&TopShot.Collection>(from: /storage/MomentCollection) == nil {
-
-                            // create a new TopShot Collection
-                            let collection <- TopShot.createEmptyCollection() as! @TopShot.Collection
-
-                            // Put the new Collection in storage
-                            acct.save(<-collection, to: /storage/MomentCollection)
-
-                            // create a public capability for the collection
-                            acct.link<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection, target: /storage/MomentCollection)
-                        }
-                    }
-                }
-            `);
-        },
-        setupSignatureAccount() {
-            const vm = this;
-            vm.sendTransaction(`
-                import Autograph from 0xf3fcd2c1a78f5eee
-
-                // This transaction sets up an account to use autographs
-                // by storing an empty autograph collection and creating
-                // a public capability for it
-
-                transaction {
-
-                    prepare(acct: AuthAccount) {
-
-                        // First, check to see if a autograph collection already exists
-                        if acct.borrow<&Autograph.Collection>(from: /storage/AutographCollection) == nil {
-
-                            // create a new Autograph Collection
-                            let collection <- Autograph.createEmptyCollection() as! @Autograph.Collection
-
-                            // Put the new Collection in storage
-                            acct.save(<-collection, to: /storage/AutographCollection)
-
-                            // create a public capability for the collection
-                            acct.link<&{Autograph.AutographCollectionPublic}>(/public/AutographCollection, target: /storage/AutographCollection)
-                        }
-                    }
-                }
-            `);
-        },
-        createSignature(momentId) {
+        createSignature(blobText) {
             const vm = this;
             vm.sendTransaction(`
                 import NonFungibleToken from 0x01cf0e2f2f715450
@@ -121,7 +81,7 @@ export default {
                             ?? panic("Could not borrow a reference to the stored TopShot collection")
                         
                         // Borrow a reference to the specified moment
-                        let moment = collectionRefTopShot.borrowMoment(id: ${momentId})
+                        let moment = collectionRefTopShot.borrowMoment(id: ${vm.currentMomentId})
                             ?? panic("Could not borrow a reference to the specified moment")
 
                         // Save author resource
@@ -129,7 +89,7 @@ export default {
                         let authorRef = acct.borrow<&Autograph.Author>(from: /storage/AutographAuthor)!
 
                         // Mint a new NFT
-                        let autograph <- Autograph.mintAutograph(metadata: {"Name": "Test"}, author: authorRef)
+                        let autograph <- Autograph.mintAutograph(metadata: {"SignatureBlob": "${blobText}"}, author: authorRef)
 
                         // destroy the author resource
                         destroy <-acct.load<@Autograph.Author>(from: /storage/AutographAuthor)

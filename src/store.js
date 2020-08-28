@@ -31,11 +31,13 @@ export default new Vuex.Store({
                 fcl.limit(100),
             ]);
 
-            fcl.tx(response).subscribe((transaction) => {
-                if (fcl.tx.isSealed(transaction)) {
-                    console.log("Transaction sealed");
-                }
-            });
+            return new Promise(resolve => {
+                fcl.tx(response).subscribe((transaction) => {
+                    if (fcl.tx.isSealed(transaction)) {
+                        resolve();
+                    }
+                });
+            })
         },
         async sendScript(store, script) {
             const response = await fcl.send([fcl.script`${script}`]);
