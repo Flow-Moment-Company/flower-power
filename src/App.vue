@@ -3,7 +3,7 @@
         <v-main>
             <Header class="header" />
             <router-view class="content" />
-            <!--<Footer class="footer" />-->
+            <Footer class="footer" />
         </v-main>
     </v-app>
 </template>
@@ -17,14 +17,14 @@ import * as fcl from "@onflow/fcl";
 export default {
     components: {
         Header,
-        //Footer,
+        Footer,
     },
     computed: {
         ...mapGetters(["address"]),
     },
     methods: {
         ...mapMutations(["setUser", "setMoments"]),
-        ...mapActions(["sendScript", "sendTransaction"]),
+        ...mapActions(["sendScript", "sendTransaction", "getMoment"]),
         async loadMomentMetadata() {
             const vm = this;
             const momentIds = await vm.sendScript(`
@@ -45,87 +45,7 @@ export default {
             const moments = [];
 
             for (const momentId of momentIds) {
-                const metadata = await vm.sendScript(`
-                    import TopShot from 0x179b6b1cb6755e31
-
-                    pub fun main(): {String: String} {
-
-                        let collectionRef = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
-                            .borrow<&{TopShot.MomentCollectionPublic}>()
-                            ?? panic("Could not get public moment collection reference")
-
-                        let token = collectionRef.borrowMoment(id: ${momentId})
-                            ?? panic("Could not borrow a reference to the specified moment")
-
-                        let data = token.data
-
-                        let metadata = TopShot.getPlayMetaData(playID: data.playID) ?? panic("Play doesn't exist")
-
-                        log(metadata)
-
-                        return metadata
-                    }
-                `);
-
-                metadata.autographs = [];
-
-                const autographIds = await vm.sendScript(`
-                    import TopShot from 0x179b6b1cb6755e31
-                    pub fun main(): [UInt64] {
-                        let token = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
-                                    .borrow<&{TopShot.MomentCollectionPublic}>()!.borrowMoment(id: ${momentId})!
-                        log(token.autographs.keys)
-                        return token.autographs.keys
-                    }
-                `);
-
-                for (const autographId of autographIds) {
-                    const author = await vm.sendScript(`
-                        import TopShot from 0x179b6b1cb6755e31
-                        import Autograph from 0xf3fcd2c1a78f5eee
-
-                        pub fun main(): Address {
-                            let collectionRef = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
-                                .borrow<&{TopShot.MomentCollectionPublic}>()
-                                ?? panic("Could not get public moment collection reference")
-
-                            let moment = collectionRef.borrowMoment(id: ${momentId})
-                                ?? panic("Could not borrow a reference to the specified moment")
-
-                            let autograph = &moment.autographs[UInt64(${autographId})] as &Autograph.NFT
-
-                            log(autograph.author)
-                            return autograph.author
-                        }
- 
-                    `);
-
-                    const signatureDocument = await vm.sendScript(`
-                        import TopShot from 0x179b6b1cb6755e31
-                        import Autograph from 0xf3fcd2c1a78f5eee
-
-                        pub fun main(): String {
-                            let collectionRef = getAccount(0x${vm.address}).getCapability(/public/MomentCollection)!
-                                .borrow<&{TopShot.MomentCollectionPublic}>()
-                                ?? panic("Could not get public moment collection reference")
-
-                            let moment = collectionRef.borrowMoment(id: ${momentId})
-                                ?? panic("Could not borrow a reference to the specified moment")
-
-                            let autograph = &moment.autographs[UInt64(${autographId})] as &Autograph.NFT
-
-                            log(autograph.document)
-                            return autograph.document
-                        }
-                    `);
-
-                    metadata.autographs.push({
-                        document: signatureDocument,
-                        author,
-                    });
-                }
-
-                metadata.id = momentId;
+                const metadata = await vm.getMoment(momentId);
                 moments.push(metadata);
             }
             return moments;
@@ -186,6 +106,9 @@ export default {
 </script>
 
 <style>
+.pointer:hover {
+    cursor: pointer;
+}
 .header {
     position: fixed;
     top: 0px;
@@ -203,3 +126,4 @@ export default {
     height: 50px;
 }
 </style>
+ 

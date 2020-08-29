@@ -7,12 +7,14 @@
             height="500px"
             :options="options"
         />
-        <!--<video ref="video" />-->
+        <v-btn @click="submitSignature">Submit</v-btn>
+        <v-btn @click="clearSignature">Clear</v-btn>
+        <!--<video ref="video" />
         <v-btn
             @click="stopRecording"
             v-if="mediaRecorder && mediaRecorder.state === 'recording'"
         >Stop</v-btn>
-        <v-btn @click="startRecording" v-else>Start</v-btn>
+        <v-btn @click="startRecording" v-else>Start</v-btn>-->
     </v-card>
 </template>
 
@@ -30,51 +32,19 @@ export default {
         };
     },
     methods: {
-        startRecording() {
+        clearSignature() {
             const vm = this;
-
-            const options = { mimeType: "video/webm" };
-            vm.mediaRecorder = new MediaRecorder(vm.stream, options);
-
-            console.log(
-                "Created MediaRecorder",
-                vm.mediaRecorder,
-                "with options",
-                options
-            );
-            vm.mediaRecorder.onstop = vm.handleStop;
-            vm.mediaRecorder.ondataavailable = vm.handleDataAvailable;
-            vm.mediaRecorder.start(100); // collect 100ms of data
-            console.log("MediaRecorder started", vm.mediaRecorder);
+            vm.$refs.signaturePad.clearSignature();
         },
-        stopRecording() {
+        async submitSignature() {
             const vm = this;
 
-            vm.mediaRecorder.stop();
-            console.log("Recorded Blobs: ", vm.recordedBlobs);
-            //vm.$refs.video.controls = true;
-        },
-        handleDataAvailable(event) {
-            const vm = this;
-
-            if (event.data && event.data.size > 0) {
-                vm.recordedBlobs.push(event.data);
-            }
-        },
-        async handleStop(event) {
-            const vm = this;
-
-            console.log("Recorder stopped: ", event);
-            const superBuffer = new Blob(vm.recordedBlobs, {
-                type: "video/webm",
-            });
-            //const blobUrl = await vm.blobToDataURL(superBuffer);
             const blobUrl = await vm.scaleImage(
                 vm.canvas.toDataURL("image/png"),
                 0.3
             );
             vm.$emit("newSignature", blobUrl);
-            //vm.$refs.video.src = window.URL.createObjectURL(superBuffer);
+            vm.$refs.signaturePad.clearSignature();
         },
         scaleImage(dataUrl, scaleRatio, imageType, imageArguments) {
             return new Promise((resolve) => {
@@ -113,14 +83,48 @@ export default {
                 image.src = dataUrl;
             });
         },
-        blobToDataURL(blob) {
-            return new Promise((resolve) => {
-                const a = new FileReader();
-                a.onload = (e) => {
-                    resolve(e.target.result);
-                };
-                a.readAsDataURL(blob);
+
+        ///RECORDING METHODS FOR FUTURE USE
+
+        startRecording() {
+            const vm = this;
+
+            const options = { mimeType: "video/webm" };
+            vm.mediaRecorder = new MediaRecorder(vm.stream, options);
+
+            console.log(
+                "Created MediaRecorder",
+                vm.mediaRecorder,
+                "with options",
+                options
+            );
+            vm.mediaRecorder.onstop = vm.handleStop;
+            vm.mediaRecorder.ondataavailable = vm.handleDataAvailable;
+            vm.mediaRecorder.start(100); // collect 100ms of data
+            console.log("MediaRecorder started", vm.mediaRecorder);
+        },
+        stopRecording() {
+            const vm = this;
+
+            vm.mediaRecorder.stop();
+            console.log("Recorded Blobs: ", vm.recordedBlobs);
+            //vm.$refs.video.controls = true;
+        },
+        handleDataAvailable(event) {
+            const vm = this;
+
+            if (event.data && event.data.size > 0) {
+                vm.recordedBlobs.push(event.data);
+            }
+        },
+        async handleStop(event) {
+            const vm = this;
+
+            console.log("Recorder stopped: ", event);
+            const superBuffer = new Blob(vm.recordedBlobs, {
+                type: "video/webm",
             });
+            //vm.$refs.video.src = window.URL.createObjectURL(superBuffer);
         },
     },
     mounted() {

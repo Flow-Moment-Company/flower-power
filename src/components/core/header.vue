@@ -14,6 +14,7 @@ export default {
     data() {
         return {
             fcl,
+            navigation: true,
         };
     },
     computed: {
