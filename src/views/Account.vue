@@ -17,8 +17,16 @@
                             @click="$router.push({name: 'Moment', query: { momentId: item.id }})"
                         >
                             <v-card-title>{{ item.FullName }}</v-card-title>
+                            <v-spacer></v-spacer>
+                            <v-img :src="item.Hero"  aspect-ratio="1"/>
                             {{ item.CurrentTeam }}
+                            <v-spacer></v-spacer>
+                            {{ item.PlayCategory}} 
+                            <v-spacer></v-spacer>
+                            {{item.Rarity }} | {{item.DateOfMoment}}
+                            <v-spacer></v-spacer>
                             Autographs:
+                            <v-spacer></v-spacer>
                             <span
                                 v-for="autograph of item.autographs"
                                 :key="autograph.document"
