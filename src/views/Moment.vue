@@ -1,33 +1,34 @@
 <template>
-  <div>
-    <v-card max-width="1200" class="mx-auto">
-      <v-row>
-         <v-col cols="12" lg="12"> 
-          <v-card-actions>
-            <v-btn @click="showSignaturePad = true">Sign it</v-btn>
-          </v-card-actions>
-          <SignaturePad v-if="showSignaturePad" @newSignature="createSignature" />
-        </v-col>
-        <v-col cols="12" lg="6">          
-            <v-img :src="moment.Hero" max-height="400" max-width="400"></v-img>
-        </v-col>
-        <v-col cols="12" lg="6">
-        <v-list-item>
-        <v-list-item-content>
-          <v-list-item-title class="headline">{{ moment.FullName }}</v-list-item-title>
-          <v-list-item-subtitle>{{ moment.CurrentTeam }}</v-list-item-subtitle>
-        <v-card-text>
-            <v-spacer></v-spacer>
-            {{ moment.PlayCategory}}
-            <v-spacer></v-spacer>
-            {{moment.Rarity }} | {{moment.DateOfMoment}}
-            <v-spacer></v-spacer>
-          </v-card-text>
-        </v-list-item-content>
-      </v-list-item></v-col>     
-      </v-row>
-    </v-card>
-  </div>
+    <div>
+        <v-card max-width="1200" class="mx-auto">
+            <v-row>
+                <v-col cols="12" lg="12">
+                    <v-card-actions>
+                        <v-btn @click="showSignaturePad = true">Sign it</v-btn>
+                    </v-card-actions>
+                    <SignaturePad v-if="showSignaturePad" @newSignature="createSignature" />
+                </v-col>
+                <v-col cols="12" lg="6">
+                    <v-img :src="moment.Hero" max-height="400" max-width="400"></v-img>
+                </v-col>
+                <v-col cols="12" lg="6">
+                    <v-list-item>
+                        <v-list-item-content>
+                            <v-list-item-title class="headline">{{ moment.FullName }}</v-list-item-title>
+                            <v-list-item-subtitle>{{ moment.CurrentTeam }}</v-list-item-subtitle>
+                            <v-card-text>
+                                <v-spacer></v-spacer>
+                                {{ moment.PlayCategory}}
+                                <v-spacer></v-spacer>
+                                {{moment.Rarity }} | {{moment.DateOfMoment}}
+                                <v-spacer></v-spacer>
+                            </v-card-text>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-col>
+            </v-row>
+        </v-card>
+    </div>
 </template>
 
 <script>
@@ -35,14 +36,14 @@ import { mapGetters, mapActions, mapState, mapMutations } from "vuex";
 import SignaturePad from "@/components/core/signature-pad";
 
 export default {
-  data() {
-    return {
-      showSignaturePad: false,
-    };
-  },
-  components: {
-    SignaturePad,
-  },
+    data() {
+        return {
+            showSignaturePad: false,
+        };
+    },
+    components: {
+        SignaturePad,
+    },
     computed: {
         ...mapGetters(["address"]),
         ...mapState(["moments"]),
@@ -97,28 +98,27 @@ export default {
                     }
                 }
             `);
-      vm.showSignaturePad = false;
-      const newMoment = { ...vm.moment };
-      newMoment.autographs.push({
-        author: `0x${vm.address}`,
-        document: blobText,
-      });
-      const newMoments = [...vm.moments];
-      const momentIndex = newMoments.findIndex(
-        (moment) => moment.id === newMoment.id
-      );
-      newMoments.splice(momentIndex, 1, newMoment);
-      vm.setMoments(newMoments);
+            vm.showSignaturePad = false;
+            const newMoment = { ...vm.moment };
+            newMoment.autographs.push({
+                author: `0x${vm.address}`,
+                document: blobText,
+            });
+            const newMoments = [...vm.moments];
+            const momentIndex = newMoments.findIndex(
+                (moment) => moment.id === newMoment.id
+            );
+            newMoments.splice(momentIndex, 1, newMoment);
+            vm.setMoments(newMoments);
+        },
     },
-  },
-  mounted() {
-    const vm = this;
-    if (vm.$route.query.sign) {
-      vm.showSignaturePad = true;
-    }
-  },
+    mounted() {
+        const vm = this;
+        if (vm.$route.query.sign) {
+            vm.showSignaturePad = true;
+        }
+    },
 };
-
 </script>
 
 <style>
