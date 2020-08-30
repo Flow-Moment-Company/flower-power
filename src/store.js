@@ -76,15 +76,14 @@ export default new Vuex.Store({
                 pub fun main(): [UInt64] {
                     let token = getAccount(0x${getters.address}).getCapability(/public/MomentCollection)!
                                 .borrow<&{TopShot.MomentCollectionPublic}>()!.borrowMoment(id: ${momentId})!
-                    log(token.autographs.keys)
-                    return token.autographs.keys
+                    log(token.getAutographIDs())
+                    return token.getAutographIDs()
                 }
             `);
 
             for (const autographId of autographIds) {
                 const author = await dispatch("sendScript", `
                     import TopShot from 0x179b6b1cb6755e31
-                    import Autograph from 0xf3fcd2c1a78f5eee
 
                     pub fun main(): Address {
                         let collectionRef = getAccount(0x${getters.address}).getCapability(/public/MomentCollection)!
@@ -94,7 +93,8 @@ export default new Vuex.Store({
                         let moment = collectionRef.borrowMoment(id: ${momentId})
                             ?? panic("Could not borrow a reference to the specified moment")
 
-                        let autograph = &moment.autographs[UInt64(${autographId})] as &Autograph.NFT
+                        let autograph = moment.borrowAutograph(autographID: ${autographId})
+                            ?? panic("Could not borrow a reference to the specified autograph")
 
                         log(autograph.author)
                         return autograph.author
@@ -104,7 +104,6 @@ export default new Vuex.Store({
 
                 const signatureDocument = await dispatch("sendScript", `
                     import TopShot from 0x179b6b1cb6755e31
-                    import Autograph from 0xf3fcd2c1a78f5eee
 
                     pub fun main(): String {
                         let collectionRef = getAccount(0x${getters.address}).getCapability(/public/MomentCollection)!
@@ -114,7 +113,8 @@ export default new Vuex.Store({
                         let moment = collectionRef.borrowMoment(id: ${momentId})
                             ?? panic("Could not borrow a reference to the specified moment")
 
-                        let autograph = &moment.autographs[UInt64(${autographId})] as &Autograph.NFT
+                        let autograph = moment.borrowAutograph(autographID: ${autographId})
+                            ?? panic("Could not borrow a reference to the specified autograph")
 
                         log(autograph.document)
                         return autograph.document

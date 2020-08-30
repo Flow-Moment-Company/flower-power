@@ -41,7 +41,6 @@ export default {
         async createSignature(blobText) {
             const vm = this;
             await vm.sendTransaction(`
-                import NonFungibleToken from 0x01cf0e2f2f715450
                 import TopShot from 0x179b6b1cb6755e31
                 import Autograph from 0xf3fcd2c1a78f5eee
 
@@ -73,9 +72,8 @@ export default {
                         // destroy the author resource
                         destroy <-acct.load<@Autograph.Author>(from: /storage/AutographAuthor)
                         
-                        // Attach the autograph to the moment
-                        let oldAutograph <- moment.autographs[autograph.id] <- autograph
-                        destroy oldAutograph
+                        // Deposit the autograph to the moment
+                        moment.depositAutograph(autograph: <-autograph)
                     }
                 }
             `);
