@@ -27,6 +27,15 @@
                     </v-list-item>
                 </v-col>
             </v-row>
+            <v-row>
+                <v-col>Autographs:</v-col>
+            </v-row>
+            <v-row v-for="autograph in moment.autographs" :key="autograph.document">
+                <v-col>
+                    {{ autograph.author }}
+                    <v-img :src="autograph.document" />
+                </v-col>
+            </v-row>
         </v-card>
     </div>
 </template>
