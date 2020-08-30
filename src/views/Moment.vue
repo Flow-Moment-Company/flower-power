@@ -43,17 +43,6 @@ export default {
   components: {
     SignaturePad,
   },
-  computed: {
-    ...mapGetters(["address"]),
-    ...mapState(["moments"]),
-    momentId() {
-      const vm = this;
-      return vm.$route.query.momentId;
-    },
-    moment() {
-      const vm = this;
-      return vm.moments.filter((moment) => moment.id === vm.momentId)[0];
-    },
     computed: {
         ...mapGetters(["address"]),
         ...mapState(["moments"]),
@@ -129,6 +118,7 @@ export default {
     }
   },
 };
+
 </script>
 
 <style>
