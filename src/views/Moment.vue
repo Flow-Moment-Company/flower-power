@@ -24,9 +24,7 @@
             <v-spacer></v-spacer>
           </v-card-text>
         </v-list-item-content>
-      </v-list-item></v-col>
-        
-        
+      </v-list-item></v-col>     
       </v-row>
     </v-card>
   </div>
@@ -56,14 +54,24 @@ export default {
       const vm = this;
       return vm.moments.filter((moment) => moment.id === vm.momentId)[0];
     },
-  },
-  methods: {
-    ...mapActions(["sendTransaction"]),
-    ...mapMutations(["setMoments"]),
-    async createSignature(blobText) {
-      const vm = this;
-      await vm.sendTransaction(`
-                import NonFungibleToken from 0x01cf0e2f2f715450
+    computed: {
+        ...mapGetters(["address"]),
+        ...mapState(["moments"]),
+        momentId() {
+            const vm = this;
+            return vm.$route.query.momentId;
+        },
+        moment() {
+            const vm = this;
+            return vm.moments.filter((moment) => moment.id === vm.momentId)[0];
+        },
+    },
+    methods: {
+        ...mapActions(["sendTransaction"]),
+        ...mapMutations(["setMoments"]),
+        async createSignature(blobText) {
+            const vm = this;
+            await vm.sendTransaction(`
                 import TopShot from 0x179b6b1cb6755e31
                 import Autograph from 0xf3fcd2c1a78f5eee
 
@@ -95,9 +103,8 @@ export default {
                         // destroy the author resource
                         destroy <-acct.load<@Autograph.Author>(from: /storage/AutographAuthor)
                         
-                        // Attach the autograph to the moment
-                        let oldAutograph <- moment.autographs[autograph.id] <- autograph
-                        destroy oldAutograph
+                        // Deposit the autograph to the moment
+                        moment.depositAutograph(autograph: <-autograph)
                     }
                 }
             `);
