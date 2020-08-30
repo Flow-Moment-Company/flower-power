@@ -96,8 +96,14 @@ export default {
             vm.setUser(user);
             if (user.loggedIn) {
                 await vm.setupTopShotAndSignatureAccount();
+                if (vm.$route.name !== "Account") {
+                    vm.$router.push("/account");
+                }
                 vm.setMoments(await vm.loadMomentMetadata());
             } else {
+                if (vm.$route.name !== "Home") {
+                    vm.$router.push("/");
+                }
                 vm.setMoments([]);
             }
         });

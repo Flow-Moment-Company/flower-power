@@ -45,10 +45,16 @@ import { mapGetters, mapActions, mapState } from "vuex";
 export default {
     computed: {
         ...mapState(["moments"]),
-        ...mapGetters(["address"]),
+        ...mapGetters(["address", "loggedIn"]),
     },
     methods: {
         ...mapActions(["sendScript", "sendTransaction"]),
+    },
+    mounted() {
+        const vm = this;
+        if (!vm.loggedIn) {
+            vm.$router.push("/");
+        }
     },
 };
 </script>
