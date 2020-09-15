@@ -33,7 +33,9 @@
             <v-row v-for="autograph in moment.autographs" :key="autograph.document">
                 <v-col>
                     {{ autograph.author }}
-                    <v-img :src="autograph.document" />
+                    <video controls>
+                        <source type="video/webm" :src="autograph.document" />
+                    </video>
                 </v-col>
             </v-row>
         </v-card>
